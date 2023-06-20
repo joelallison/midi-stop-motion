@@ -27,6 +27,49 @@ process:
 
 '''
 
+mid = mi.MidiFile('all_the_drums.mid')
+for msg in mid.tracks[0]:
+    if not msg.is_meta:
+        print(msg)
+
+class drum_hit:
+    def __init__(self, drum, hit_type):
+        self.drum = drum
+        self.hit_type = hit_type
+
+#this is for the Logic Pro X Drum Kit Designer mapping
+drum_mapping = {
+    28 : drum_hit("crash_left", "stop"),
+    29 : drum_hit("crash_right", "stop"),
+    31 : drum_hit("hi_hat", "foot_splash"),
+    32 : drum_hit("snare", "rimshot_edge"),
+    33 : drum_hit("hi_hat", "foot_close"),
+    34 : drum_hit("snare", "edge"),
+    35 : drum_hit("kick", None),
+    36 : drum_hit("kick", None),
+    37 : drum_hit("snare", "sidestick"),
+    38 : drum_hit("snare", "center"),
+    39 : drum_hit("clap", None),
+    40 : drum_hit("snare", "rimshot"),
+    41 : drum_hit("low_tom", "1"),
+    42 : drum_hit("hi_hat", "closed"),
+    43 : drum_hit("low_tom", "2"),
+    44 : drum_hit("hi_hat", "foot_close"),
+    45 : drum_hit("mid_tom", "1"),
+    46 : drum_hit("hi_hat", "open"),
+    47 : drum_hit("mid_tom", "2"),
+    48 : drum_hit("hi_tom", "1"),
+    49 : drum_hit("crash_left", None),
+    50 : drum_hit("hi_tom", "2"),
+    51 : drum_hit("ride", "out"),
+    52 : drum_hit("ride", "edge"),
+    53 : drum_hit("ride", "bell"),
+    54 : drum_hit("tambourine", None),
+    56 : drum_hit("cowbell", None),
+    57 : drum_hit("crash_right", None),
+    59 : drum_hit("ride", "in")
+}
+
 class Drum_state:
     def __init__(self, left_hand, right_hand, kick, hi_hat_open):
         self.left_hand = left_hand
