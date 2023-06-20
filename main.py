@@ -34,5 +34,5 @@ class Drum_state:
         self.kick = kick
         self.hi_hat_open = hi_hat_open
 
-
 state = Drum_state('snare', 'tom', False, False)
+
