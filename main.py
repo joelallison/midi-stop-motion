@@ -16,6 +16,8 @@ should it be single images or short videos? both options? try with single images
 whether hi hat is open should be taken into account!!
 therefore might need double the amount of photos/videos?
 
+and the pedal hi hat whole thing should be taken into account and be allowed to be processed separately kinda
+
 process: 
     - (into an array) convert midi events into timestamps via tempo information
     - process that array into the states system
@@ -24,3 +26,13 @@ process:
     - stitch together the image
 
 '''
+
+class Drum_state:
+    def __init__(self, left_hand, right_hand, kick, hi_hat_open):
+        self.left_hand = left_hand
+        self.right_hand = right_hand
+        self.kick = kick
+        self.hi_hat_open = hi_hat_open
+
+
+state = Drum_state('snare', 'tom', False, False)
