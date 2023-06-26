@@ -2,21 +2,10 @@ import pretty_midi
 import cv2 as cv
 
 '''
-plan:
 
-figure out all the different combinations of drum hits. [I only have two hands]
-    ---> number of things to hit + (number of things to hit-1 * (number of things to hit))...?
-    
-figure out a way to label the states...?
-could just be like snare_tom1, in the form lefthand_righthand
-and a single hit would be something like snare_0 or 0_tom1
+I think short videos is best
 
-should it be single images or short videos? both options? try with single images first?
-
-whether hi hat is open should be taken into account!!
-therefore might need double the amount of photos/videos?
-
-and the pedal hi hat whole thing should be taken into account and be allowed to be processed separately kinda
+The videos need to be cut to length so that anticipation time is taken into account and stuff
 
 process: 
     - (into an array) convert midi events into timestamps via tempo information
@@ -37,6 +26,13 @@ class drum_state:
         self.right_hand = right_hand
         self.kick = kick
         self.hi_hat_open = hi_hat
+
+    def __init__(self, left_hand, right_hand):
+        self.left_hand = left_hand
+        self.right_hand = right_hand
+
+    def to_string(self):
+        return "Left hand: " + self.left_hand + "\tRight hand: " + self.right_hand
 
 #this is for the Logic Pro X Drum Kit Designer mapping
 drum_mapping = {
@@ -71,32 +67,34 @@ drum_mapping = {
     59 : drum_hit("ride", "in")
 }
 
+whitelist = ["kick", "snare", "hi_hat", "ride"]
+
 def create_all_possible_states():
     states = []
-    stick_hits = {}
+    drums = []
 
     for item in drum_mapping:
-        if not (drum_mapping.get(item).drum == "kick" or drum_mapping.get(item).hit_type[:4] == "foot"):
-            stick_hits.update({item : drum_mapping.get(item)})
+        if (drum_mapping.get(item).drum in whitelist):
+            if not (drum_mapping.get(item).drum == "kick" or drum_mapping.get(item).hit_type[:4] == "foot"):
+                if drum_mapping.get(item).drum not in drums:
+                    if drum_mapping.get(item).drum == "hi_hat":
+                        drums.append(drum_mapping.get(item).drum + "." + drum_mapping.get(item).hit_type)
+                    else:
+                        drums.append(drum_mapping.get(item).drum)
 
-    for item in stick_hits:
-        second_hand_hits = {}
-
-        for hit in stick_hits:
-            if not (stick_hits.get(hit).drum == stick_hits.get(item).drum):
-                second_hand_hits.update({hit: stick_hits.get(hit)})
-
-        for secondary_item in second_hand_hits:
-            states.append(drum_state(stick_hits.get(item), stick_hits.get(secondary_item), False, False))
-            states.append(drum_state(stick_hits.get(item), stick_hits.get(secondary_item), False, True))
-            states.append(drum_state(stick_hits.get(item), stick_hits.get(secondary_item), True, False))
-            states.append(drum_state(stick_hits.get(item), stick_hits.get(secondary_item), True, True))
+    for drum1 in drums:
+        for drum2 in drums:
+            if not (drum1 == drum2):
+                states.append(drum_state(drum1, drum2))
+        states.append(drum_state("-", drum1))
+        states.append(drum_state(drum1, "-"))
 
     return states
 
+
 count = 0
-for x in create_all_possible_states():
-    print(count, "\t", x.right_hand.drum + "." + x.right_hand.hit_type, " ", x.left_hand.drum + "." + x.left_hand.hit_type, " ", x.kick, " ", x.hi_hat_open)
+for state in create_all_possible_states():
+    print(str(count) + "\t" + state.to_string())
     count += 1
 
 '''
