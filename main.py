@@ -1,20 +1,6 @@
 import pretty_midi
 import cv2 as cv
 
-'''
-
-I think short videos is best
-
-The videos need to be cut to length so that anticipation time is taken into account and stuff
-
-process: 
-    - (into an array) convert midi events into timestamps via tempo information
-    - process that array into the states system
-    - state object: label & timestamp
-    - lookup image via label (dictionary)
-    - stitch together the image
-
-'''
 class drum_hit:
     def __init__(self, drum, hit_type):
         self.drum = drum
@@ -67,6 +53,11 @@ drum_mapping = {
     59 : drum_hit("ride", "in")
 }
 
+midi_data = pretty_midi.PrettyMIDI('test.mid')
+generate_whitelist_from_music = True
+if generate_whitelist_from_music:
+    pass
+
 whitelist = ["kick", "snare", "hi_hat", "ride"]
 
 def create_all_possible_states():
@@ -90,18 +81,3 @@ def create_all_possible_states():
         states.append(drum_state(drum1, "-"))
 
     return states
-
-
-count = 0
-for state in create_all_possible_states():
-    print(str(count) + "\t" + state.to_string())
-    count += 1
-
-'''
-midi_data = pretty_midi.PrettyMIDI('test.mid')
-print("duration:",midi_data.get_end_time())
-print(f'{"drum":>10} {"type":>10}{"start":>10} {"end":>10}')
-for instrument in midi_data.instruments:
-    for note in instrument.notes:
-        print(f'{drum_mapping[note.pitch].drum:10} {drum_mapping[note.pitch].hit_type:10} {note.start:10} {note.end:10}')
-'''
