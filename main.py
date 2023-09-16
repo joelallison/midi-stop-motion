@@ -1,83 +1,46 @@
 import pretty_midi
-import cv2 as cv
+import tkinter as tk
+from tkinter import ttk
 
-class drum_hit:
-    def __init__(self, drum, hit_type):
-        self.drum = drum
-        self.hit_type = hit_type
+framerate = 12
+inverse_framerate = 1/framerate
+total_frames = 0
 
-class drum_state:
-    def __init__(self, left_hand, right_hand, kick, hi_hat):
-        self.left_hand = left_hand
-        self.right_hand = right_hand
-        self.kick = kick
-        self.hi_hat_open = hi_hat
+def load_file():
+    global midi_data
+    global total_frames
 
-    def __init__(self, left_hand, right_hand):
-        self.left_hand = left_hand
-        self.right_hand = right_hand
+    midi_data = pretty_midi.PrettyMIDI(filename_entry.get())
+    total_frames = int(framerate * midi_data.get_end_time())
+    total_frames_value.config(text=total_frames)
 
-    def to_string(self):
-        return "Left hand: " + self.left_hand + "\tRight hand: " + self.right_hand
+    notes_per_frame = [[] for i in range(total_frames)]
 
-#this is for the Logic Pro X Drum Kit Designer mapping
-drum_mapping = {
-    28 : drum_hit("crash_left", "stop"),
-    29 : drum_hit("crash_right", "stop"),
-    31 : drum_hit("hi_hat", "foot_splash"),
-    32 : drum_hit("snare", "rimshot_edge"),
-    33 : drum_hit("hi_hat", "foot_close"),
-    34 : drum_hit("snare", "edge"),
-    35 : drum_hit("kick", "-"),
-    36 : drum_hit("kick", "-"),
-    37 : drum_hit("snare", "sidestick"),
-    38 : drum_hit("snare", "center"),
-    39 : drum_hit("clap", "-"),
-    40 : drum_hit("snare", "rimshot"),
-    41 : drum_hit("low_tom", "1"),
-    42 : drum_hit("hi_hat", "closed"),
-    43 : drum_hit("low_tom", "2"),
-    44 : drum_hit("hi_hat", "foot_close"),
-    45 : drum_hit("mid_tom", "1"),
-    46 : drum_hit("hi_hat", "open"),
-    47 : drum_hit("mid_tom", "2"),
-    48 : drum_hit("hi_tom", "1"),
-    49 : drum_hit("crash_left", "-"),
-    50 : drum_hit("hi_tom", "2"),
-    51 : drum_hit("ride", "out"),
-    52 : drum_hit("ride", "edge"),
-    53 : drum_hit("ride", "bell"),
-    54 : drum_hit("tambourine", "-"),
-    56 : drum_hit("cowbell", "-"),
-    57 : drum_hit("crash_right", "-"),
-    59 : drum_hit("ride", "in")
-}
+    for instrument in midi_data.instruments:
+        for note in instrument.notes:
+            for i in range(total_frames):
+                if (i * inverse_framerate >= note.start) and (i * inverse_framerate < note.end):
+                    print(note.pitch, "\t", i * inverse_framerate, " : ", note.start, " : ", note.end)
+                    notes_per_frame[i].append(note.pitch)
 
-midi_data = pretty_midi.PrettyMIDI('test.mid')
-generate_whitelist_from_music = True
-if generate_whitelist_from_music:
-    pass
+    print(notes_per_frame)
 
-whitelist = ["kick", "snare", "hi_hat", "ride"]
 
-def create_all_possible_states():
-    states = []
-    drums = []
+root = tk.Tk()
+frm = ttk.Frame(root, padding=10)
+frm.grid()
+filename_label = tk.Label(frm, text="File name: ")
+filename_label.grid(column=0, row=0)
 
-    for item in drum_mapping:
-        if (drum_mapping.get(item).drum in whitelist):
-            if not (drum_mapping.get(item).drum == "kick" or drum_mapping.get(item).hit_type[:4] == "foot"):
-                if drum_mapping.get(item).drum not in drums:
-                    if drum_mapping.get(item).drum == "hi_hat":
-                        drums.append(drum_mapping.get(item).drum + "." + drum_mapping.get(item).hit_type)
-                    else:
-                        drums.append(drum_mapping.get(item).drum)
+filename_entry = tk.Entry(frm, text="")
+filename_entry.grid(column=1, row=0)
 
-    for drum1 in drums:
-        for drum2 in drums:
-            if not (drum1 == drum2):
-                states.append(drum_state(drum1, drum2))
-        states.append(drum_state("-", drum1))
-        states.append(drum_state(drum1, "-"))
+tk.Button(frm, text="Load", command=load_file).grid(column=2, row=0)
 
-    return states
+total_frames_label = tk.Label(frm, text="Total frames: ")
+total_frames_label.grid(column=0, row=1)
+
+total_frames_value = tk.Label(frm, text="")
+total_frames_value.grid(column=1, row=1)
+
+root.mainloop()
